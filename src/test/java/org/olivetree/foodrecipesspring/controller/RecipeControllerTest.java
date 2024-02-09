@@ -3,6 +3,7 @@ package org.olivetree.foodrecipesspring.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.olivetree.foodrecipesspring.RecipeSecurityConfigTest;
 import org.olivetree.foodrecipesspring.exception.RecipeNotFoundException;
 import org.olivetree.foodrecipesspring.model.RecipeDto;
 import org.olivetree.foodrecipesspring.model.RecipeFilterDto;
@@ -11,6 +12,7 @@ import org.olivetree.foodrecipesspring.util.ErrorMessages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -28,6 +30,7 @@ import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(RecipeController.class)
+@Import(RecipeSecurityConfigTest.class)
 public class RecipeControllerTest {
     @Autowired
     private MockMvc mockMvc;
