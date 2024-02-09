@@ -29,9 +29,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(RecipeController.class)
+@WebMvcTest(RecipeRestController.class)
 @Import(RecipeSecurityConfigTest.class)
-public class RecipeControllerTest {
+public class RecipeRestControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
