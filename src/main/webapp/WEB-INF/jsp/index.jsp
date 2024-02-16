@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,8 +14,20 @@
 <body>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
         <a class="navbar-brand" href="<c:out value='/'/>">Get Started</a>
-        <a class="navbar-brand" href="<c:out value='recipes'/>">Recipes</a>
+        <sec:authorize access="!isAuthenticated()">
+            <a class="navbar-brand" href="<c:out value='login'/>">Login</a>
+        </sec:authorize>
+        <sec:authorize access="isAuthenticated()">
+            <a class="navbar-brand" href="<c:out value='recipes'/>">Recipes</a>
+            <a class="navbar-brand" href="<c:out value='logout'/>">Logout</a>
+        </sec:authorize>
     </nav>
-    <h1>Index</h1>
+    <h1>Get Started</h1>
+    <sec:authorize access="!isAuthenticated()">
+        You are not logged in into the system. Please login before you can access the recipes.
+    </sec:authorize>
+    <sec:authorize access="isAuthenticated()">
+        Welcome Back, <sec:authentication property="name" />
+    </sec:authorize>
 </body>
 </html>

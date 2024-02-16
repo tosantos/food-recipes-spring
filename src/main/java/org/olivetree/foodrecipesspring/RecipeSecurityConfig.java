@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.sql.DataSource;
 
@@ -28,9 +29,22 @@ public class RecipeSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.authorizeHttpRequests((authz) ->
-                        authz.requestMatchers("/api/**").authenticated()
+                        authz.requestMatchers("/api/**", "/recipes").authenticated()
                         .anyRequest().permitAll()
                 ).csrf(AbstractHttpConfigurer::disable)
+                .formLogin(fm ->
+                        fm.loginPage("/login")
+                        .loginProcessingUrl("/perform_login")
+                        .failureUrl("/login?error=true")
+                        .permitAll()
+                        .defaultSuccessUrl("/", true)
+                )
+                .logout(logout ->
+                        logout
+                                .deleteCookies("JSESSIONID")
+                                .invalidateHttpSession(true)
+                                .permitAll()
+                )
                 .httpBasic(withDefaults());
 
         return http.build();
