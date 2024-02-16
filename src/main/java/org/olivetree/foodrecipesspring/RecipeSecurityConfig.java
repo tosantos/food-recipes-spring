@@ -1,5 +1,6 @@
 package org.olivetree.foodrecipesspring;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,10 +14,16 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+import javax.sql.DataSource;
+
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 public class RecipeSecurityConfig {
+
+    @Autowired
+    private DataSource dataSource;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -30,13 +37,10 @@ public class RecipeSecurityConfig {
     }
 
     @Bean
-    public InMemoryUserDetailsManager userDetailsService() {
-        UserDetails user = User.builder()
-                .username("tosantos")
-                .password(passwordEncoder().encode("password"))
-                .roles("USER")
-                .build();
-        return new InMemoryUserDetailsManager(user);
+    public JdbcUserDetailsManager jdbcUserDetailsManager() {
+        JdbcUserDetailsManager manager = new JdbcUserDetailsManager();
+        manager.setDataSource(dataSource);
+        return manager;
     }
 
     @Bean
