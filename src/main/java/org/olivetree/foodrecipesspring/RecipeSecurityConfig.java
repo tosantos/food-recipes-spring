@@ -20,9 +20,9 @@ public class RecipeSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.authorizeHttpRequests(
-                (authz) -> authz
-                        .anyRequest().authenticated()
+        http.authorizeHttpRequests((authz) ->
+                        authz.requestMatchers("/api/**").authenticated()
+                        .anyRequest().permitAll()
                 ).csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(withDefaults());
 
@@ -43,12 +43,4 @@ public class RecipeSecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    /*
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().antMatchers("/ignore1", "/ignore2");
-    }
-
-     */
 }
