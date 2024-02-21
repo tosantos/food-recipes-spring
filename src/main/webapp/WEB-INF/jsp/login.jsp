@@ -28,19 +28,21 @@
         </div>
     </c:if>
 
+    <div class="container-sm">
+        <form:form action="perform_login" method="post">
 
-    <form:form action="perform_login" method="post">
-        <div class="container-sm">
-            <div class="mb-3">
-                <label for="username">User Name :</label>
-                <input type="text" class="form-control" name="username" id="username"/>
-            </div>
-            <div class="mb-3">
-                <label for="password">Password :</label>
-                <input type="password" class="form-control" name="password" id="password"/>
-            </div>
-            <input type="submit" class="btn btn-lg btn-primary" role="button" value="Login"/>
-        </div>
-    </form:form>
+                <div class="mb-3">
+                    <label for="username">User Name :</label>
+                    <input type="text" class="form-control" name="username" id="username"/>
+                </div>
+                <div class="mb-3">
+                    <label for="password">Password :</label>
+                    <input type="password" class="form-control" name="password" id="password"/>
+                </div>
+                <input type="submit" class="btn btn-lg btn-primary" role="button" value="Login"/>
+        </form:form>
+        Not registered? <a href="<c:out value='/account'/>">Create an account</a
+    </div>
+
 </body>
 </html>
