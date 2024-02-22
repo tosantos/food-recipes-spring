@@ -8,6 +8,17 @@ spring:
     username: root
     password: pass
     driver-class-name: com.mysql.cj.jdbc.Driver
+  mail:
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PWD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   jpa:
     hibernate:
       ddl-auto: none

@@ -7,10 +7,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.olivetree.foodrecipesspring.domain.Account;
+import org.olivetree.foodrecipesspring.events.OnCreateAccountEvent;
 import org.olivetree.foodrecipesspring.exception.AccountAlreadyExistsException;
 import org.olivetree.foodrecipesspring.exception.PasswordMismatchException;
 import org.olivetree.foodrecipesspring.model.AccountDto;
 import org.olivetree.foodrecipesspring.repository.AccountRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -29,8 +31,11 @@ public class AccountServiceTest {
     @Mock
     private PasswordEncoder encoder;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     @BeforeEach() void setup() {
-        accountService = new AccountServiceImpl(accountRepository, encoder);
+        accountService = new AccountServiceImpl(accountRepository, encoder, eventPublisher);
     }
 
     @Test
@@ -56,6 +61,7 @@ public class AccountServiceTest {
         accountService.createAccount(accountDto);
 
         verify(accountRepository, times(1)).saveAndFlush(any(Account.class));
+        verify(eventPublisher, times(1)).publishEvent(any(OnCreateAccountEvent.class));
     }
 
     @Test

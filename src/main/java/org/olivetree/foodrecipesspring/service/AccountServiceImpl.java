@@ -1,11 +1,13 @@
 package org.olivetree.foodrecipesspring.service;
 
 import org.olivetree.foodrecipesspring.domain.Account;
+import org.olivetree.foodrecipesspring.events.OnCreateAccountEvent;
 import org.olivetree.foodrecipesspring.exception.AccountAlreadyExistsException;
 import org.olivetree.foodrecipesspring.exception.PasswordMismatchException;
 import org.olivetree.foodrecipesspring.model.AccountDto;
 import org.olivetree.foodrecipesspring.repository.AccountRepository;
 import org.olivetree.foodrecipesspring.util.ErrorMessages;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +18,14 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
 
-    public AccountServiceImpl(AccountRepository accountRepository, PasswordEncoder encoder) {
+    private final ApplicationEventPublisher eventPublisher;
+
+    public AccountServiceImpl(AccountRepository accountRepository,
+                              PasswordEncoder encoder,
+                              ApplicationEventPublisher eventPublisher) {
         this.accountRepository = accountRepository;
         this.encoder = encoder;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -41,6 +48,10 @@ public class AccountServiceImpl implements AccountService {
         account.setPassword(encoder.encode(account.getPassword()));
 
         Account createdAccount = accountRepository.saveAndFlush(account);
+
+        // Fire on create account event
+        eventPublisher.publishEvent(new OnCreateAccountEvent(account));
+
         return convertToDto(createdAccount);
     }
 
