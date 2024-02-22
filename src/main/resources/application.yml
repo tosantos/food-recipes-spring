@@ -4,9 +4,9 @@ spring:
       prefix: /WEB-INF/jsp/
       suffix: .jsp
   datasource:
-    url: jdbc:mysql://localhost:3006/recipes_db
-    username: root
-    password: pass
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PWD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   mail:
     host: ${SMTP_HOST}
@@ -23,3 +23,6 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
+recipeapp:
+  server:
+    url: ${RECIPE_SERVER_URL}

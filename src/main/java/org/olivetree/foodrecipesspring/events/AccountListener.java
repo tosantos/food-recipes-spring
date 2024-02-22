@@ -1,9 +1,9 @@
 package org.olivetree.foodrecipesspring.events;
 
 import org.olivetree.foodrecipesspring.domain.Account;
-import org.olivetree.foodrecipesspring.service.AccountService;
 import org.olivetree.foodrecipesspring.service.VerificationTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -14,7 +14,8 @@ import java.util.UUID;
 @Component
 public class AccountListener implements ApplicationListener<OnCreateAccountEvent> {
 
-    private final String serverUrl = "http://localhost:8080";
+    @Value("${recipeapp.server.url}")
+    private String serverUrl;
 
     @Autowired
     private JavaMailSender mailSender;
