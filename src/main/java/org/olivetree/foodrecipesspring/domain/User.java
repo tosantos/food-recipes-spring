@@ -14,9 +14,8 @@ import static jakarta.persistence.FetchType.EAGER;
 
 @Entity(name = "users")
 public class User {
-    @Id
-    UUID id;
 
+    @Id
     @Column
     String username;
 
@@ -30,15 +29,6 @@ public class User {
     List<UserAuthority> userAuthorities = new ArrayList<>();
 
     public User() {}
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
 
     public String getUsername() {
         return username;
