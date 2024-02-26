@@ -12,6 +12,7 @@ import org.olivetree.foodrecipesspring.exception.AccountAlreadyExistsException;
 import org.olivetree.foodrecipesspring.exception.PasswordMismatchException;
 import org.olivetree.foodrecipesspring.model.AccountDto;
 import org.olivetree.foodrecipesspring.repository.AccountRepository;
+import org.olivetree.foodrecipesspring.repository.VerificationTokenRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -29,13 +30,16 @@ public class AccountServiceTest {
     private AccountRepository accountRepository;
 
     @Mock
+    private VerificationTokenRepository verificationTokenRepository;
+
+    @Mock
     private PasswordEncoder encoder;
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
     @BeforeEach() void setup() {
-        accountService = new AccountServiceImpl(accountRepository, encoder, eventPublisher);
+        accountService = new AccountServiceImpl(accountRepository, verificationTokenRepository, encoder, eventPublisher);
     }
 
     @Test
