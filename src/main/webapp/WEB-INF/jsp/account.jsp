@@ -60,7 +60,7 @@
             <form:password path="passwordconfirm" id="passwordconfirm" class="form-control"/>
             <form:errors path="passwordconfirm" cssClass="error" />
         </div>
-        <input type="submit" class="btn btn-lg btn-primary" role="button" value="Login"/>
+        <input type="submit" class="btn btn-lg btn-primary" role="button" value="Create"/>
     </div>
 </form:form>
 </body>

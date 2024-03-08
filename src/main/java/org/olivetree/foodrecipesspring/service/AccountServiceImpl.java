@@ -1,6 +1,9 @@
 package org.olivetree.foodrecipesspring.service;
 
+import jakarta.transaction.Transactional;
 import org.olivetree.foodrecipesspring.domain.Account;
+import org.olivetree.foodrecipesspring.domain.User;
+import org.olivetree.foodrecipesspring.domain.UserAuthority;
 import org.olivetree.foodrecipesspring.domain.VerificationToken;
 import org.olivetree.foodrecipesspring.domain.VerificationTokenPK;
 import org.olivetree.foodrecipesspring.events.OnCreateAccountEvent;
@@ -8,6 +11,7 @@ import org.olivetree.foodrecipesspring.exception.AccountAlreadyExistsException;
 import org.olivetree.foodrecipesspring.exception.PasswordMismatchException;
 import org.olivetree.foodrecipesspring.model.AccountDto;
 import org.olivetree.foodrecipesspring.repository.AccountRepository;
+import org.olivetree.foodrecipesspring.repository.UserRepository;
 import org.olivetree.foodrecipesspring.repository.VerificationTokenRepository;
 import org.olivetree.foodrecipesspring.util.ErrorMessages;
 import org.springframework.context.ApplicationEventPublisher;
@@ -15,6 +19,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -25,16 +32,20 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
 
+    private final UserRepository userRepository;
+
     private final VerificationTokenRepository verificationTokenRepository;
 
     private final ApplicationEventPublisher eventPublisher;
 
     public AccountServiceImpl(AccountRepository accountRepository,
                               VerificationTokenRepository verificationTokenRepository,
+                              UserRepository userRepository,
                               PasswordEncoder encoder,
                               ApplicationEventPublisher eventPublisher) {
         this.accountRepository = accountRepository;
         this.verificationTokenRepository = verificationTokenRepository;
+        this.userRepository = userRepository;
         this.encoder = encoder;
         this.eventPublisher = eventPublisher;
     }
@@ -77,6 +88,61 @@ public class AccountServiceImpl implements AccountService {
         verificationToken.setExpiryDate(LocalDateTime.now().plusMinutes(TOKEN_EXPIRY_IN_MINUTES));
 
         verificationTokenRepository.saveAndFlush(verificationToken);
+    }
+
+    @Override
+    @Transactional
+    public void confirmAccount(String username) {
+        Optional<Account> accountOptional = accountRepository.findByUsername(username);
+
+        if(accountOptional.isEmpty()) {
+            throw new RuntimeException("Account not found");
+        }
+
+        Account account = accountOptional.get();
+
+        UserAuthority userAuthority = new UserAuthority();
+        userAuthority.setAuthority("ROLE_USER");
+
+        User user = new User();
+        user.setUsername(account.getUsername());
+        user.setPassword(account.getPassword());
+        user.getUserAuthorities().add(userAuthority);
+        user.setEnabled(true);
+
+        userAuthority.setUser(user);
+
+        // Save user and user authority
+        userRepository.saveAndFlush(user);
+
+        // Delete from accounts
+        accountRepository.delete(account);
+
+        // Delete verification token for username
+        verificationTokenRepository.deleteByTokenIdUsername(username);
+    }
+
+    @Override
+    public VerificationToken findByToken(String token) {
+        return verificationTokenRepository.findByTokenIdToken(token);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAccount(String username) {
+        Optional<Account> accountOptional = accountRepository.findByUsername(username);
+
+        if(accountOptional.isEmpty()) {
+            throw new RuntimeException("Account not found");
+        }
+
+        Account account = accountOptional.get();
+
+        // Delete from accounts
+        accountRepository.delete(account);
+
+        // Delete verification token for username
+        verificationTokenRepository.deleteByTokenIdUsername(username);
     }
 
     private AccountDto convertToDto(Account createdAccount) {

@@ -1,9 +1,6 @@
 package org.olivetree.foodrecipesspring.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 import java.util.UUID;
 
@@ -11,9 +8,8 @@ import java.util.UUID;
 public class UserAuthority {
 
     @Id
-    UUID id;
-
     @ManyToOne
+    @JoinColumn(name="username")
     User user;
 
     @Column
@@ -21,14 +17,6 @@ public class UserAuthority {
 
     public UserAuthority() {
 
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     public User getUser() {

@@ -1,7 +1,7 @@
 package org.olivetree.foodrecipesspring.controller;
 
 import jakarta.validation.Valid;
-import org.olivetree.foodrecipesspring.domain.Account;
+import org.olivetree.foodrecipesspring.domain.VerificationToken;
 import org.olivetree.foodrecipesspring.exception.AccountAlreadyExistsException;
 import org.olivetree.foodrecipesspring.exception.PasswordMismatchException;
 import org.olivetree.foodrecipesspring.model.AccountDto;
@@ -12,6 +12,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+
+import java.time.LocalDateTime;
 
 @Controller
 public class AccountController {
@@ -45,5 +47,20 @@ public class AccountController {
         }
 
         return "account";
+    }
+
+    @GetMapping("accountConfirm")
+    public String confirmAccount(String token) {
+
+        VerificationToken verificationToken = accountService.findByToken(token);
+
+        // Check that the verification token expiry date is not in the past
+        if(verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            accountService.deleteAccount(verificationToken.getTokenId().getUsername());
+            return "accountExpired";
+        }
+
+        accountService.confirmAccount(verificationToken.getTokenId().getUsername());
+        return "accountConfirmed";
     }
 }

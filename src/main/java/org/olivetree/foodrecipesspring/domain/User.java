@@ -25,7 +25,7 @@ public class User {
     @Column
     Boolean enabled = true;
 
-    @OneToMany(cascade=ALL, fetch=EAGER)
+    @OneToMany(cascade=ALL, fetch=EAGER, mappedBy = "user")
     List<UserAuthority> userAuthorities = new ArrayList<>();
 
     public User() {}
