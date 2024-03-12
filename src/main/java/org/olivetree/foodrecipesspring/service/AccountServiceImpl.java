@@ -7,9 +7,11 @@ import org.olivetree.foodrecipesspring.domain.UserAuthority;
 import org.olivetree.foodrecipesspring.domain.VerificationToken;
 import org.olivetree.foodrecipesspring.domain.VerificationTokenPK;
 import org.olivetree.foodrecipesspring.events.OnCreateAccountEvent;
+import org.olivetree.foodrecipesspring.events.OnResetPasswordEvent;
 import org.olivetree.foodrecipesspring.exception.AccountAlreadyExistsException;
 import org.olivetree.foodrecipesspring.exception.PasswordMismatchException;
 import org.olivetree.foodrecipesspring.model.AccountDto;
+import org.olivetree.foodrecipesspring.model.UserAccountDto;
 import org.olivetree.foodrecipesspring.repository.AccountRepository;
 import org.olivetree.foodrecipesspring.repository.UserRepository;
 import org.olivetree.foodrecipesspring.repository.VerificationTokenRepository;
@@ -130,6 +132,16 @@ public class AccountServiceImpl implements AccountService {
 
         // Delete verification token for username
         verificationTokenRepository.deleteByTokenIdUsername(username);
+    }
+
+    @Override
+    public void resetAccount(String email) {
+        //verify email from database and fire off an event to reset password
+        accountRepository.findByEmail(email)
+                .ifPresent(e -> {
+                    UserAccountDto accountDto = new UserAccountDto(e.getEmail(), e.getUsername());
+                    eventPublisher.publishEvent(new OnResetPasswordEvent(accountDto));
+                });
     }
 
     private AccountDto convertToDto(Account createdAccount) {

@@ -3,6 +3,7 @@ package org.olivetree.foodrecipesspring.service;
 import org.olivetree.foodrecipesspring.domain.Account;
 import org.olivetree.foodrecipesspring.domain.VerificationToken;
 import org.olivetree.foodrecipesspring.model.AccountDto;
+import org.olivetree.foodrecipesspring.model.UserAccountDto;
 
 public interface AccountService {
 
@@ -15,4 +16,6 @@ public interface AccountService {
     VerificationToken findByToken(String token);
 
     void deleteAccount(String username);
+
+    void resetAccount(String email);
 }

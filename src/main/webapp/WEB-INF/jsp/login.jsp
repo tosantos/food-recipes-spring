@@ -40,8 +40,9 @@
                     <input type="password" class="form-control" name="password" id="password"/>
                 </div>
                 <input type="submit" class="btn btn-lg btn-primary" role="button" value="Login"/>
+                <a href="<c:out value='/password'/>">Forgot password</a>
         </form:form>
-        Not registered? <a href="<c:out value='/account'/>">Create an account</a
+        Not registered? <a href="<c:out value='/account'/>">Create an account</a>
     </div>
 
 </body>

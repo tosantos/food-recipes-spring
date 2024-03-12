@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.olivetree.foodrecipesspring.domain.Account;
+import org.olivetree.foodrecipesspring.domain.VerificationToken;
 import org.olivetree.foodrecipesspring.events.OnCreateAccountEvent;
 import org.olivetree.foodrecipesspring.exception.AccountAlreadyExistsException;
 import org.olivetree.foodrecipesspring.exception.PasswordMismatchException;
@@ -61,7 +62,7 @@ public class AccountServiceTest {
         when(accountRepository.findByUsernameOrEmail(accountDto.username(), accountDto.email())).thenReturn(Optional.empty());
         when(encoder.encode(password)).thenReturn("aaa");
 
-        Account account = getAccountFromRepository(username, firstname, lastname, password, email);
+        Account account = getAccountFromRepository(username, firstname, lastname, email);
 
         when(accountRepository.saveAndFlush(any(Account.class)))
                 .thenReturn(account);
@@ -101,17 +102,26 @@ public class AccountServiceTest {
         AccountDto accountDto = new AccountDto(username, firstname, lastname, password, passwordconfirm, email);
 
         when(accountRepository.findByUsernameOrEmail(accountDto.username(), accountDto.email()))
-                .thenReturn(Optional.of(getAccountFromRepository(username, firstname, lastname, password, email)));
+                .thenReturn(Optional.of(getAccountFromRepository(username, firstname, lastname, email)));
 
         assertThrows(AccountAlreadyExistsException.class, () -> accountService.createAccount(accountDto));
     }
 
-    private Account getAccountFromRepository(String username, String firstName, String lastName, String password, String email) {
+    @Test
+    @DisplayName("Given Account username and random token when verification token is created then token is persisted")
+    public void givenAccountUsernameAndRandomTokenWhenVerificationTokenIsCreatedThenTokenIsPersisted() {
+        String username = "username";
+
+        accountService.createVerificationToken(username, "randomToken");
+
+        verify(verificationTokenRepository, times(1)).saveAndFlush(any(VerificationToken.class));
+    }
+
+    private Account getAccountFromRepository(String username, String firstName, String lastName, String email) {
         Account account = new Account();
         account.setUsername(username);
         account.setFirstName(firstName);
         account.setLastName(lastName);
-        account.setPassword(password);
         account.setEmail(email);
         return account;
     }
