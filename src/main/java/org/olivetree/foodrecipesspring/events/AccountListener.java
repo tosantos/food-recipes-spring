@@ -27,7 +27,7 @@ public class AccountListener implements ApplicationListener<OnCreateAccountEvent
     public void onApplicationEvent(OnCreateAccountEvent event) {
         Account account = event.getAccount();
         String token = UUID.randomUUID().toString();
-        accountService.createVerificationToken(token, account);
+        accountService.createVerificationToken(account.getUsername(), token);
 
         String confirmationUrl = "/accountConfirm?token=" + token;
 

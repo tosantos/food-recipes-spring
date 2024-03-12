@@ -8,7 +8,7 @@ public interface AccountService {
 
     AccountDto createAccount(AccountDto accountDto);
 
-    void createVerificationToken(String token, Account account);
+    void createVerificationToken(String username, String token);
 
     void confirmAccount(String username);
 

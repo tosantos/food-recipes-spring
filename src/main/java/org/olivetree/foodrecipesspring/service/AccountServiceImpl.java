@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -51,6 +50,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional
     public AccountDto createAccount(AccountDto accountDto) {
 
         //should verify that the account doesn't already exist
@@ -65,11 +65,9 @@ public class AccountServiceImpl implements AccountService {
         }
 
         Account account = getAccount(accountDto);
-
-        // Encrypt the password
-        account.setPassword(encoder.encode(account.getPassword()));
-
         Account createdAccount = accountRepository.saveAndFlush(account);
+
+        createUser(accountDto);
 
         // Fire on create account event
         eventPublisher.publishEvent(new OnCreateAccountEvent(account));
@@ -78,10 +76,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void createVerificationToken(String token, Account account) {
+    public void createVerificationToken(String username, String token) {
         VerificationTokenPK pk = new VerificationTokenPK();
         pk.setToken(token);
-        pk.setUsername(account.getUsername());
+        pk.setUsername(username);
 
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setTokenId(pk);
@@ -93,30 +91,16 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public void confirmAccount(String username) {
-        Optional<Account> accountOptional = accountRepository.findByUsername(username);
+        Optional<User> userOptional = userRepository.findById(username);
 
-        if(accountOptional.isEmpty()) {
+        if(userOptional.isEmpty()) {
             throw new RuntimeException("Account not found");
         }
 
-        Account account = accountOptional.get();
-
-        UserAuthority userAuthority = new UserAuthority();
-        userAuthority.setAuthority("ROLE_USER");
-
-        User user = new User();
-        user.setUsername(account.getUsername());
-        user.setPassword(account.getPassword());
-        user.getUserAuthorities().add(userAuthority);
+        // Enable the user
+        User user = userOptional.get();
         user.setEnabled(true);
-
-        userAuthority.setUser(user);
-
-        // Save user and user authority
         userRepository.saveAndFlush(user);
-
-        // Delete from accounts
-        accountRepository.delete(account);
 
         // Delete verification token for username
         verificationTokenRepository.deleteByTokenIdUsername(username);
@@ -137,6 +121,9 @@ public class AccountServiceImpl implements AccountService {
         }
 
         Account account = accountOptional.get();
+
+        // Delete from users
+        userRepository.deleteById(username);
 
         // Delete from accounts
         accountRepository.delete(account);
@@ -159,10 +146,25 @@ public class AccountServiceImpl implements AccountService {
     private Account getAccount(AccountDto accountDto) {
         Account account = new Account();
         account.setEmail(accountDto.email());
-        account.setPassword(accountDto.password());
         account.setFirstName(accountDto.firstname());
         account.setLastName(accountDto.lastname());
         account.setUsername(accountDto.username());
         return account;
+    }
+
+    private void createUser(AccountDto accountDto) {
+        UserAuthority userAuthority = new UserAuthority();
+        userAuthority.setAuthority("ROLE_USER");
+
+        User user = new User();
+        user.setUsername(accountDto.username());
+        user.setPassword(encoder.encode(accountDto.password()));
+        user.getUserAuthorities().add(userAuthority);
+        user.setEnabled(false);
+
+        userAuthority.setUser(user);
+
+        // Save user and user authority
+        userRepository.saveAndFlush(user);
     }
 }
