@@ -7,10 +7,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
-    <title>Reset Password</title>
+    <title>Create Account</title>
 
     <!-- Bootstrap core CSS -->
     <link href="assets/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+    <style>
+        .error {
+            color: #ff0000;
+        }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
@@ -22,21 +28,26 @@
 
 <h1>Reset Password</h1>
 
-<c:if test="${not empty param.sent}" >
+<c:if test="${not empty param.reset}" >
     <div class="alert alert-success" role="alert">
-        An email has been sent to you with instructions on how to reset your password.
+        Your password has been reset!
     </div>
 </c:if>
-
-<div class="container-sm">
-    <form:form modelAttribute="userAccount" method="post">
+<form:form method="post" modelAttribute="password">
+    <div class="container-sm">
         <div class="mb-3">
-            <label for="email">Email :</label>
-            <input type="text" class="form-control" name="email" id="email"/>
+            <label for="password">Password :</label>
+            <form:password path="password" id="password" class="form-control"/>
+            <form:errors path="password" cssClass="error" />
         </div>
+        <div class="mb-3">
+            <label for="passwordconfirm">Confirm Password :</label>
+            <form:password path="matchingPassword" id="passwordconfirm" class="form-control"/>
+            <form:errors path="matchingPassword" cssClass="error" />
+        </div>
+        <form:hidden path="username" />
         <input type="submit" class="btn btn-lg btn-primary" role="button" value="Reset Password"/>
-    </form:form>
-</div>
-
+    </div>
+</form:form>
 </body>
 </html>

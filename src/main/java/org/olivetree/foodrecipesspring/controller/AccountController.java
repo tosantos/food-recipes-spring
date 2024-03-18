@@ -60,7 +60,7 @@ public class AccountController {
             return "accountExpired";
         }
 
-        accountService.confirmAccount(verificationToken.getTokenId().getUsername());
+        accountService.confirmUserAccount(verificationToken.getTokenId().getUsername());
         return "accountConfirmed";
     }
 }

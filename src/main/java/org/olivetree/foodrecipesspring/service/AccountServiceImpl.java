@@ -1,18 +1,16 @@
 package org.olivetree.foodrecipesspring.service;
 
 import jakarta.transaction.Transactional;
-import org.olivetree.foodrecipesspring.domain.Account;
-import org.olivetree.foodrecipesspring.domain.User;
-import org.olivetree.foodrecipesspring.domain.UserAuthority;
-import org.olivetree.foodrecipesspring.domain.VerificationToken;
-import org.olivetree.foodrecipesspring.domain.VerificationTokenPK;
+import org.olivetree.foodrecipesspring.domain.*;
 import org.olivetree.foodrecipesspring.events.OnCreateAccountEvent;
 import org.olivetree.foodrecipesspring.events.OnResetPasswordEvent;
 import org.olivetree.foodrecipesspring.exception.AccountAlreadyExistsException;
 import org.olivetree.foodrecipesspring.exception.PasswordMismatchException;
 import org.olivetree.foodrecipesspring.model.AccountDto;
+import org.olivetree.foodrecipesspring.model.PasswordDto;
 import org.olivetree.foodrecipesspring.model.UserAccountDto;
 import org.olivetree.foodrecipesspring.repository.AccountRepository;
+import org.olivetree.foodrecipesspring.repository.ResetTokenRepository;
 import org.olivetree.foodrecipesspring.repository.UserRepository;
 import org.olivetree.foodrecipesspring.repository.VerificationTokenRepository;
 import org.olivetree.foodrecipesspring.util.ErrorMessages;
@@ -37,15 +35,19 @@ public class AccountServiceImpl implements AccountService {
 
     private final VerificationTokenRepository verificationTokenRepository;
 
+    private final ResetTokenRepository resetTokenRepository;
+
     private final ApplicationEventPublisher eventPublisher;
 
     public AccountServiceImpl(AccountRepository accountRepository,
                               VerificationTokenRepository verificationTokenRepository,
+                              ResetTokenRepository resetTokenRepository,
                               UserRepository userRepository,
                               PasswordEncoder encoder,
                               ApplicationEventPublisher eventPublisher) {
         this.accountRepository = accountRepository;
         this.verificationTokenRepository = verificationTokenRepository;
+        this.resetTokenRepository = resetTokenRepository;
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.eventPublisher = eventPublisher;
@@ -92,7 +94,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public void confirmAccount(String username) {
+    public void confirmUserAccount(String username) {
         Optional<User> userOptional = userRepository.findById(username);
 
         if(userOptional.isEmpty()) {
@@ -111,6 +113,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public VerificationToken findByToken(String token) {
         return verificationTokenRepository.findByTokenIdToken(token);
+    }
+
+    @Override
+    public ResetToken findByResetToken(String token) {
+        return resetTokenRepository.findByTokenIdToken(token);
     }
 
     @Override
@@ -141,6 +148,39 @@ public class AccountServiceImpl implements AccountService {
                 .ifPresent(e -> {
                     UserAccountDto accountDto = new UserAccountDto(e.getEmail(), e.getUsername());
                     eventPublisher.publishEvent(new OnResetPasswordEvent(accountDto));
+                });
+    }
+
+    @Override
+    public void createPasswordResetToken(String username, String token) {
+        ResetTokenPK pk = new ResetTokenPK();
+        pk.setToken(token);
+        pk.setUsername(username);
+
+        ResetToken resetToken = new ResetToken();
+        resetToken.setTokenId(pk);
+        resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(TOKEN_EXPIRY_IN_MINUTES));
+
+        resetTokenRepository.saveAndFlush(resetToken);
+    }
+
+    @Override
+    @Transactional
+    public void resetAccountPassword(PasswordDto password) {
+        //should verify that the password and the password confirmation match
+        if(!password.password().equals(password.matchingPassword())) {
+            throw new PasswordMismatchException(ErrorMessages.PASSWORDS_MISMATCH);
+        }
+
+        String username = password.username();
+
+        userRepository.findById(username)
+                .ifPresent(user -> {
+                    user.setPassword(encoder.encode(password.password()));
+                    userRepository.saveAndFlush(user);
+
+                    // Delete reset token for username
+                    resetTokenRepository.deleteByTokenIdUsername(username);
                 });
     }
 

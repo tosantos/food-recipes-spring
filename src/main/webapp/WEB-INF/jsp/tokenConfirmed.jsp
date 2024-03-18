@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
-    <title>Reset Password</title>
+    <title>Confirm Account</title>
 
     <!-- Bootstrap core CSS -->
     <link href="assets/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
@@ -19,23 +19,10 @@
         <a class="navbar-brand" href="<c:out value='login'/>">Login</a>
     </sec:authorize>
 </nav>
-
-<h1>Reset Password</h1>
-
-<c:if test="${not empty param.sent}" >
+<div class="container">
     <div class="alert alert-success" role="alert">
-        An email has been sent to you with instructions on how to reset your password.
+        Your account password has been changed successfully.
     </div>
-</c:if>
-
-<div class="container-sm">
-    <form:form modelAttribute="userAccount" method="post">
-        <div class="mb-3">
-            <label for="email">Email :</label>
-            <input type="text" class="form-control" name="email" id="email"/>
-        </div>
-        <input type="submit" class="btn btn-lg btn-primary" role="button" value="Reset Password"/>
-    </form:form>
 </div>
 
 </body>
